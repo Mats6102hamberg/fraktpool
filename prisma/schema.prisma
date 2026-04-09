@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Shipment {
+  id              String       @id @default(cuid())
+  // Fraktdata
+  fromCountry     String
+  toCountry       String
+  weightKg        Float?
+  volumeM3        Float?
+  goodsType       String?
+  carrierName     String?
+  price           Int
+  surcharge       Int          @default(0)
+  deliveryDays    Int?
+  // Kontaktdata
+  companyName     String
+  contactName     String
+  email           String
+  note            String?
+  // Analysresultat (sätts av regelmotorn)
+  analysisStatus  String       // rimligt | lite_hogt | avvikande
+  analysisReason  String?
+  percentAbove    Int?
+  benchmarkPrice  Int?
+  warnings        String[]
+  createdAt       DateTime     @default(now())
+
+  lead            FreightLead?
+}
+
+model FreightLead {
+  id              String    @id @default(cuid())
+  shipmentId      String    @unique
+  shipment        Shipment  @relation(fields: [shipmentId], references: [id])
+  companyName     String
+  contactName     String
+  email           String
+  status          String    @default("new") // new | contacted | negotiating | won | lost
+  internalComment String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
